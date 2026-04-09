@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Contract, parseUnits } from "ethers";
+import { useState, useMemo } from "react";
+import { Contract, parseUnits, formatUnits } from "ethers";
 import type { BrowserProvider } from "ethers";
 import { CELOTIP_ADDRESS, CELOTIP_ABI, ERC20_ABI, CELO_TOKENS } from "@/lib/contract";
 import { Button } from "@/components/ui/button";
@@ -9,14 +9,23 @@ import { toast } from "sonner";
 interface TipFormProps {
   provider: BrowserProvider;
   senderAddress: string;
+  walletType: string;
 }
 
 const PRESET_AMOUNTS = ["1", "5", "10", "25"];
 
-export function TipForm({ provider, senderAddress }: TipFormProps) {
+export function TipForm({ provider, senderAddress, walletType }: TipFormProps) {
+  // MiniPay doesn't support native CELO, only stablecoins
+  const availableTokens = useMemo(() => {
+    if (walletType === "minipay") {
+      return CELO_TOKENS.filter((t) => t.symbol !== "CELO");
+    }
+    return CELO_TOKENS;
+  }, [walletType]);
+
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
-  const [selectedToken, setSelectedToken] = useState(CELO_TOKENS[1]); // cUSD default
+  const [selectedToken, setSelectedToken] = useState(availableTokens.find(t => t.symbol === "cUSD") || availableTokens[0]);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -31,15 +40,25 @@ export function TipForm({ provider, senderAddress }: TipFormProps) {
       const signer = await provider.getSigner();
       const parsedAmount = parseUnits(amount, selectedToken.decimals);
 
-      // Check allowance and approve if needed
+      // Check balance first
       const tokenContract = new Contract(selectedToken.address, ERC20_ABI, signer);
-      let needsApproval = true;
+      try {
+        const balance = await tokenContract.balanceOf(senderAddress);
+        if (balance < parsedAmount) {
+          toast.error(`Insufficient ${selectedToken.symbol} balance. You have ${formatUnits(balance, selectedToken.decimals)} ${selectedToken.symbol}`);
+          setSending(false);
+          return;
+        }
+      } catch {
+        // Continue if balance check fails
+      }
 
+      // Check allowance and approve if needed
+      let needsApproval = true;
       try {
         const currentAllowance = await tokenContract.allowance(senderAddress, CELOTIP_ADDRESS);
         needsApproval = currentAllowance < parsedAmount;
       } catch {
-        // Some wallets (MiniPay) may fail on allowance check — approve anyway
         needsApproval = true;
       }
 
@@ -68,7 +87,14 @@ export function TipForm({ provider, senderAddress }: TipFormProps) {
       setMessage("");
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.reason || err?.message || "Transaction failed");
+      const msg = err?.reason || err?.message || "Transaction failed";
+      if (msg.includes("INSUFFICIENT_FUNDS") || msg.includes("insufficient funds")) {
+        toast.error("Not enough funds for gas fees. Make sure you have cUSD or cEUR for gas on MiniPay.");
+      } else if (msg.includes("rejected") || msg.includes("-32603")) {
+        toast.error("Transaction was rejected");
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setSending(false);
     }
@@ -80,7 +106,7 @@ export function TipForm({ provider, senderAddress }: TipFormProps) {
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">Token</label>
         <div className="flex gap-2">
-          {CELO_TOKENS.map((token) => (
+          {availableTokens.map((token) => (
             <button
               key={token.symbol}
               onClick={() => setSelectedToken(token)}
