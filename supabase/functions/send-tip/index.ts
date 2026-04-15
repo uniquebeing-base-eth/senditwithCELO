@@ -1,4 +1,7 @@
-import { corsHeaders } from '@supabase/supabase-js/cors';
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 import { createPublicClient, createWalletClient, http, parseUnits, formatUnits } from 'npm:viem@2';
 import { privateKeyToAccount } from 'npm:viem@2/accounts';
 import { celo } from 'npm:viem@2/chains';
