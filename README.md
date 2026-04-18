@@ -63,7 +63,7 @@ CeloTip is optimized for the [Celo MiniPay](https://www.opera.com/products/minip
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/uniquebeing-base-eth/senditwithCELO.git
+   git clone https://github.com/uniquebeing-base-eth/senditwithcelo.git
    cd senditwithCELO
    ```
 
