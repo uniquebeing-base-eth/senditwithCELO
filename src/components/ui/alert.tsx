@@ -6,16 +6,17 @@ import { cn } from "@/lib/utils";
 const alertVariants = cva(
   "relative w-full rounded-xl border p-4 shadow-sm transition-all duration-300 ease-out",
   " [&>svg~*]:pl-9 [&>svg+div]:translate-y-[-1px]",
-  " [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg]:transition-all",
-  " hover:shadow-lg hover:-translate-y-[2px]",
-  " group",
+  " [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:transition-all",
+  " backdrop-blur-sm",
+  " hover:shadow-xl hover:-translate-y-[2px] hover:scale-[1.01]",
+  " group overflow-hidden",
   {
     variants: {
       variant: {
         default:
-          "bg-background text-foreground border-border/40 hover:border-border/70",
+          "bg-background/80 text-foreground border-border/40 hover:border-border/80",
         destructive:
-          "border-destructive/40 bg-destructive/10 text-destructive dark:border-destructive [&>svg]:text-destructive hover:bg-destructive/15",
+          "border-destructive/40 bg-destructive/10 text-destructive dark:border-destructive [&>svg]:text-destructive hover:bg-destructive/20",
       },
     },
     defaultVariants: {
@@ -31,7 +32,13 @@ const Alert = React.forwardRef<
   <div
     ref={ref}
     role="alert"
-    className={cn(alertVariants({ variant }), className)}
+    className={cn(
+      alertVariants({ variant }),
+      "before:absolute before:inset-0 before:opacity-0 before:transition-opacity before:duration-300",
+      "before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent",
+      "hover:before:opacity-100",
+      className
+    )}
     {...props}
   />
 ));
@@ -45,7 +52,8 @@ const AlertTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "mb-1 font-semibold leading-tight tracking-tight text-base",
-      "transition-colors duration-200 group-hover:text-foreground",
+      "transition-all duration-200",
+      "group-hover:text-foreground group-hover:translate-x-[1px]",
       className
     )}
     {...props}
@@ -61,8 +69,8 @@ const AlertDescription = React.forwardRef<
     ref={ref}
     className={cn(
       "text-sm text-muted-foreground leading-relaxed",
-      "opacity-90 transition-opacity duration-200",
-      "group-hover:opacity-100",
+      "opacity-90 transition-all duration-200",
+      "group-hover:opacity-100 group-hover:translate-x-[1px]",
       "[&_p]:leading-relaxed",
       className
     )}
