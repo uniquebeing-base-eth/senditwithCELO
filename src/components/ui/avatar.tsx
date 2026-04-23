@@ -13,8 +13,11 @@ const Avatar = React.forwardRef<
       "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
       "border border-border/40 shadow-sm",
       "transition-all duration-300 ease-out",
-      "hover:shadow-md hover:scale-[1.03]",
-      "group",
+      "hover:shadow-lg hover:scale-[1.05]",
+      "group isolate",
+      "before:absolute before:inset-0 before:rounded-full before:opacity-0 before:transition-opacity before:duration-300",
+      "before:bg-gradient-to-tr before:from-white/10 before:via-transparent before:to-white/5",
+      "hover:before:opacity-100",
       className
     )}
     {...props}
@@ -31,7 +34,8 @@ const AvatarImage = React.forwardRef<
     className={cn(
       "aspect-square h-full w-full object-cover",
       "transition-all duration-300 ease-out",
-      "group-hover:scale-105",
+      "group-hover:scale-110",
+      "group-hover:brightness-105",
       className
     )}
     {...props}
@@ -49,7 +53,8 @@ const AvatarFallback = React.forwardRef<
       "flex h-full w-full items-center justify-center rounded-full",
       "bg-muted text-muted-foreground text-sm font-semibold",
       "transition-all duration-300",
-      "group-hover:bg-muted/80",
+      "group-hover:bg-muted/70 group-hover:text-foreground",
+      "tracking-tight",
       className
     )}
     {...props}
