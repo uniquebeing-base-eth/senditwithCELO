@@ -4,6 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+
 const alertVariants = cva(
   "relative w-full rounded-xl border p-4 shadow-sm transition-all duration-300 ease-out",
   " [&>svg~*]:pl-9 [&>svg+div]:translate-y-[-1px]",
